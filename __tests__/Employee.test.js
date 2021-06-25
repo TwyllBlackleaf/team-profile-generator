@@ -9,11 +9,11 @@ test("creates an Employee object", () => {
     expect(xyzzy.role).toBe("Employee");
 });
 
-test("gets parameters of Employee", () => {
+test("gets parameters of Employee object", () => {
     const xyzzy = new Employee("Xyzzy", 1, "xyzzy@foo.bar");
 
     expect(xyzzy.getName()).toBe("Xyzzy");
     expect(xyzzy.getId()).toBe(1);
     expect(xyzzy.getEmail()).toBe("xyzzy@foo.bar");
     expect(xyzzy.getRole()).toBe("Employee");
-})
+});
