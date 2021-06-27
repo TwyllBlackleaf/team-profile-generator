@@ -6,6 +6,9 @@
 
 // S1. Dependencies
 const inquirer = require("inquirer");
+const Engineer = require("./lib/Engineer");
+const Manager = require("./lib/Manager");
+const Intern = require("./lib/Intern");
 
 // S2. Global variables
 var engineersArr = [];
@@ -188,32 +191,35 @@ function managerPrompt(questions) {
 
 function nextEmployee() {
     inquirer.prompt({
-        type: "confirm",
-        name: "nextEmployee",
-        message: "Do you want to add another employee?",
-        default: true
+        type: "list",
+        name: "employeeType",
+        message: "Do you want to add an Engineer, add an Intern, or finish building the team?",
+        choices: ["Engineer", "Intern", "Finish Team"]
     }).then(({ answer }) => {
-        if (answer) {
-            inquirer.prompt({
-                type: "list",
-                name: "employeeType",
-                message: "Do you want to add an Engineer or an Intern?",
-                choices: ["Engineer", "Intern"]
-            }).then(({ answer }) => {
-                if (answer === "Engineer") {
-                    engineerPrompt(engineerQuestions);
-                } else {
-                    internPrompt(internQuestions);
-                }
-            })
+        if (answer === "Engineer") {
+            engineerPrompt(engineerQuestions);
+        } else if (answer === "Intern") {
+            internPrompt(internQuestions);
+        } else {
+            return;
         }
-    })
+    })  
 }
 
 function engineerPrompt(questions) {
+    inquirer.prompt(questions).then((answers) => {
+        engineer = new Engineer(answers.name, answers.idNumber, answers.email, answers.github);
+        engineersArr.push(engineer);
 
+        nextEmployee();
+    })
 }
 
 function internPrompt(questions) {
+    inquirer.prompt(questions).then((answers) => {
+        intern = new Intern(answers.name, answers.idNumber, answers.email, answers.school);
+        internsArr.push(intern);
 
+        nextEmployee();
+    })
 }
