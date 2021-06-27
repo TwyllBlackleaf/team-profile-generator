@@ -11,6 +11,7 @@ const Manager = require("./lib/Manager");
 const Intern = require("./lib/Intern");
 
 // S2. Global variables
+var manager = {};
 var engineersArr = [];
 var internsArr = [];
 
@@ -183,36 +184,49 @@ const internQuestions = [
 
 // S4. Functions
 function managerPrompt(questions) {
-    inquirer.prompt(questions).then((answers) => {
-        const manager = new Manager(answers.name, answers.idNumber, answers.email, answers.officeNumber);
-        return manager;
+    return new Promise((resolve, reject) => {
+        inquirer.prompt(questions).then((answers) => {
+            const manager = new Manager(answers.name, answers.idNumber, answers.email, answers.officeNumber);
+            resolve(manager);
+        })
     })
+        
+
+    
 }
 
 function nextEmployee() {
-    inquirer.prompt({
-        type: "list",
-        name: "employeeType",
-        message: "Do you want to add an Engineer, add an Intern, or finish building the team?",
-        choices: ["Engineer", "Intern", "Finish Team"]
-    }).then(({ answer }) => {
-        if (answer === "Engineer") {
-            engineerPrompt(engineerQuestions);
-        } else if (answer === "Intern") {
-            internPrompt(internQuestions);
-        } else {
-            return;
-        }
-    })  
+    return new Promise((resolve, reject) => {
+        inquirer.prompt({
+            type: "list",
+            name: "employeeType",
+            message: "Do you want to add an Engineer, add an Intern, or finish building the team?",
+            choices: ["Engineer", "Intern", "Finish Team"]
+        }).then(({ employeeType }) => {
+            if (employeeType === "Engineer") {
+                resolve(engineerPrompt(engineerQuestions));
+            } else if (employeeType === "Intern") {
+                resolve(internPrompt(internQuestions));
+            } else {
+                resolve(createHTML());
+            }
+        })
+    })
+     
+
+
+     
 }
 
 function engineerPrompt(questions) {
-    inquirer.prompt(questions).then((answers) => {
-        engineer = new Engineer(answers.name, answers.idNumber, answers.email, answers.github);
-        engineersArr.push(engineer);
+    inquirer.prompt(questions)
+        .then((answers) => {
+            engineer = new Engineer(answers.name, answers.idNumber, answers.email, answers.github);
+            engineersArr.push(engineer);
 
-        nextEmployee();
-    })
+            nextEmployee();
+        })
+
 }
 
 function internPrompt(questions) {
@@ -223,3 +237,20 @@ function internPrompt(questions) {
         nextEmployee();
     })
 }
+
+function createHTML() {
+    console.log(manager);    
+    console.log(engineersArr);
+    console.log(internsArr);
+}
+
+function mainLogic() {  
+    managerPrompt(managerQuestions)
+        .then((results) => {
+            manager = results;
+
+            nextEmployee();
+        })
+}
+
+mainLogic();
