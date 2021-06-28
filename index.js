@@ -9,9 +9,11 @@ const inquirer = require("inquirer");
 const Engineer = require("./lib/Engineer");
 const Manager = require("./lib/Manager");
 const Intern = require("./lib/Intern");
+const fs = require("fs");
+const generateHTML = require("./src/generateHTML");
 
 // S2. Global variables
-var manager = {};
+var manager = new Manager("", 0, "", "");
 var engineersArr = [];
 var internsArr = [];
 
@@ -186,13 +188,17 @@ const internQuestions = [
 function managerPrompt(questions) {
     return new Promise((resolve, reject) => {
         inquirer.prompt(questions).then((answers) => {
-            const manager = new Manager(answers.name, answers.idNumber, answers.email, answers.officeNumber);
-            resolve(manager);
-        })
-    })
-        
+            manager.name = answers.name;
+            manager.idNumber = answers.idNumber;
+            manager.email = answers.email;
+            manager.officeNumber = answers.officeNumber;
 
-    
+            resolve();
+        })
+        .catch((err) => {
+            if (err) throw err;
+        })
+    })   
 }
 
 function nextEmployee() {
@@ -202,7 +208,8 @@ function nextEmployee() {
             name: "employeeType",
             message: "Do you want to add an Engineer, add an Intern, or finish building the team?",
             choices: ["Engineer", "Intern", "Finish Team"]
-        }).then(({ employeeType }) => {
+        })
+        .then(({ employeeType }) => {
             if (employeeType === "Engineer") {
                 resolve(engineerPrompt(engineerQuestions));
             } else if (employeeType === "Intern") {
@@ -211,11 +218,10 @@ function nextEmployee() {
                 resolve(createHTML());
             }
         })
-    })
-     
-
-
-     
+        .catch((err) => {
+            if (err) throw err;
+        })
+    })    
 }
 
 function engineerPrompt(questions) {
@@ -239,18 +245,21 @@ function internPrompt(questions) {
 }
 
 function createHTML() {
-    console.log(manager);    
-    console.log(engineersArr);
-    console.log(internsArr);
+    fs.writeFile("./dist/index.html", generateHTML(manager, engineersArr, internsArr), (err) => {
+        if (err) throw err;
+    })
+
+    console.log("Site generated! See /dist for the results.")
 }
 
 function mainLogic() {  
     managerPrompt(managerQuestions)
-        .then((results) => {
-            manager = results;
-
+        .then(() => {
             nextEmployee();
         })
+        .catch((err) => {
+            if (err) throw err;
+        });
 }
 
 mainLogic();
